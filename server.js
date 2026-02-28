@@ -13,6 +13,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'https://examineme.onrender.com',
+    'https://examineme.vercel.app/'
   ],
   credentials: true,
 }));app.use(express.json());
