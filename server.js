@@ -9,8 +9,13 @@ const examRoutes = require('./routes/exam');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://examineme.onrender.com',
+  ],
+  credentials: true,
+}));app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
