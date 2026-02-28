@@ -12,11 +12,12 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://examineme.onrender.com',
-    'https://examineme.vercel.app/'
+    'https://examineme.vercel.app',
   ],
   credentials: true,
-}));app.use(express.json());
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
