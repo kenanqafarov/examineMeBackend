@@ -30,13 +30,45 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
-// Bütün imtahanlar
+// Bütün imtahanlar — role-a görə filter
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const exams = await Exam.find()
-      .populate('createdBy', 'nickname role')
-      .sort({ createdAt: -1 });
+    let exams;
+
+    if (req.user.role === 'admin') {
+      // Admin hamısını görür
+      exams = await Exam.find()
+        .populate('createdBy', 'nickname role')
+        .sort({ createdAt: -1 });
+    } else if (req.user.role === 'teacher') {
+      // Müəllim yalnız özününküləri görür
+      exams = await Exam.find({ createdBy: req.user.id })
+        .populate('createdBy', 'nickname role')
+        .sort({ createdAt: -1 });
+    } else {
+      // Student hamısını görür (imtahanlara girmək üçün)
+      exams = await Exam.find()
+        .populate('createdBy', 'nickname role')
+        .sort({ createdAt: -1 });
+    }
+
     res.json(exams);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// İmtahan sil (yalnız öz imtahanı və ya admin)
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id);
+    if (!exam) return res.status(404).json({ message: 'İmtahan tapılmadı' });
+
+    if (req.user.role !== 'admin' && exam.createdBy.toString() !== req.user.id)
+      return res.status(403).json({ message: 'İcazə yoxdur' });
+
+    await Exam.findByIdAndDelete(req.params.id);
+    res.json({ message: 'İmtahan silindi' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
