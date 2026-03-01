@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/Auth');
 const userRoutes = require('./routes/user');
 const examRoutes = require('./routes/exam');
+const resultRoutes = require('./routes/result');
 
 const app = express();
 
@@ -20,11 +21,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-// all done
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/exams', examRoutes);
+app.use('/api/results', resultRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB uğurla qoşuldu ✓'))

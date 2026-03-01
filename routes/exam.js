@@ -74,4 +74,36 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Tək exam gətir
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id).populate('createdBy', 'nickname');
+    if (!exam) return res.status(404).json({ message: 'İmtahan tapılmadı' });
+    res.json(exam);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// İmtahan yenilə (teacher/admin)
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id);
+    if (!exam) return res.status(404).json({ message: 'İmtahan tapılmadı' });
+
+    if (req.user.role !== 'admin' && exam.createdBy.toString() !== req.user.id)
+      return res.status(403).json({ message: 'İcazə yoxdur' });
+
+    const { title, questions } = req.body;
+    exam.title = title || exam.title;
+    exam.questions = questions || exam.questions;
+    await exam.save();
+
+    const updated = await Exam.findById(exam._id).populate('createdBy', 'nickname');
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
